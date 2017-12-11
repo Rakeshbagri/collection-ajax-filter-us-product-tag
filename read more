@@ -1,1 +1,7 @@
-#how to filter 
+#how to filter product use tag
+#how to filter product in collection page with ajax all tag
+# https://resultsonline.myshopify.com/collections/recipe 
+
+# use .custom-filter div on main div
+
+# create {% include 'ajax-recipe-sidebar' %}  snnipet
