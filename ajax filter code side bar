@@ -1,0 +1,81 @@
+<div class=" col-md-3 col-sm-4 col-xs-12 col-left" id="filter-sidebar"> 
+  
+
+  {% if template.name == 'collection' and collection.all_tags.size > 0 %}
+  {% assign categories = '' %}
+  {% for tag in collection.all_tags %}
+    {% if tag contains '_' %}
+      {% capture categories %}{% unless categories == blank  %}{{ categories }}|{% endunless %}{{ tag | split: '_' | first }}{% endcapture %}
+    {% endif %}
+  {% endfor %}
+  {% assign cat_array = categories | split: '|' | uniq %}
+{% endif %}
+ {% if collection.all_tags.size > 0 %}
+
+    <div class="grid-uniform">
+      {% comment %}
+        Loop through tag categories
+      {% endcomment %}
+      {% for cat_item in cat_array %}
+        <div class="grid-item small--one-half medium--one-third {{ cat_item }}">
+          <h6 class="h5">{{ cat_item }}</h6>
+          <ul class="advanced-filters">
+            {% comment %}
+              Loop through collection tags
+            {% endcomment %}
+            {% for tag in collection.all_tags %}
+              {% assign cat = tag | split: '_' | first %}
+              {% if cat != tag and cat_item == cat %}
+                {% comment %}
+                  Strip out tag category prefix and add/remove link for tag filtering
+                {% endcomment %}
+                {% if current_tags contains tag %}
+                  <li class="advanced-filter active-filter {{ tag | handle }}" data-group="{{ cat_item }}" data-handle="{{ tag | handle }}">{{ tag | remove_first: cat_item | remove_first: '_' | link_to_remove_tag: tag }}</li>
+                {% else %}
+                  <li class="advanced-filter {{ tag | handle }}" data-group="{{ cat_item }}" data-handle="{{ tag | handle }}">{{ tag | remove_first: cat_item | remove_first: '_' | link_to_add_tag: tag }}</li>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+
+  
+    <script>
+    $(function() {
+      $(document).on('click', '.advanced-filter', function(e){
+           e.preventDefault();
+        var base_url = window.location.origin+'/collections/{{collection.handle}}/';
+           var newIndex = $(this).attr('data-group');
+           var newValue = $(this).attr('data-handle');
+           var dataGroup = {};
+           var slug  = '';
+           $('.advanced-filter').each(function (){
+              var data_group = $(this).attr('data-group');
+              dataGroup[data_group]  = '';
+           });
+           $.each(dataGroup, function (index, value) {
+            dataGroup[index] = $('.active-filter[data-group="'+index+'"]').data('handle');
+             if((index == newIndex)){
+               dataGroup[index] = (dataGroup[index] == newValue)?'':newValue;
+             }
+             if(dataGroup[index]){
+               if(slug) slug +='+';
+               slug +=dataGroup[index];
+             }  
+           });
+         var get_url = base_url+slug;
+         $('.collection-page').html('<div class="_jsLoaderDiv"><img class="_jsLoader" src="https://cdn.shopify.com/s/files/1/2358/5863/t/5/assets/loading.gif" ></div>');
+         $.get(get_url, function(data){
+            $content =  $(data).find('.custom-filter').html();
+            $('.custom-filter').html($content);
+            history.pushState('', '', get_url);
+      	 });
+     });
+    });
+    </script>
+
+  {% endif %}
+  
+</div>
