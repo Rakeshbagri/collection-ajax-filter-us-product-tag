@@ -1,0 +1,154 @@
+<div data-section-id="{{ section.id }}" data-section-type="collection-template" class="custom-filter">
+  <header class="collection-header">
+    {%- assign is_filter_by_available = false -%}
+    {%- if section.settings.tags_enable and collection.all_tags.size > 0 -%}
+      {%- assign is_filter_by_available = true -%}
+    {%- endif -%}
+
+    {%- assign is_vendor_or_type_collection = false -%}
+    {%- if collection.current_type != blank or collection.current_vendor != blank -%}
+      {%- assign is_vendor_or_type_collection = true -%}
+    {%- endif -%}
+
+    {% if section.settings.show_collection_image and collection.image %}
+      <div class="collection-hero">
+        <div class="collection-hero__image ratio-container lazyload js" data-bgset="{% include 'bgset', image: collection.image %}" data-sizes="auto" data-parent-fit="cover"
+             style="background-image: url('{{ collection.image | img_url: '300x300' }});"></div>
+        <noscript>
+          <div class="collection-hero__image" style="background-image: url({{ collection.image | img_url: '2048x600', crop: 'top' }});"></div>
+        </noscript>
+        <div class="collection-hero__title-wrapper">
+          <h1 class="collection-hero__title page-width">
+            <span role="text">
+              <span class="visually-hidden">{{ 'collections.general.collection_label' | t }}: </span>
+              {{ collection.title }}
+            </span>
+          </h1>
+        </div>
+      </div>
+      {% if is_filter_by_available == false and section.settings.sort_enable == false %}
+        <div class="container">
+          <span class="filters-toolbar__product-count">{{ 'collections.general.items_with_count' | t: count: collection.products_count }}</span>
+        </div>
+      {% endif %}
+      {% if collection.description != blank %}
+        <div class="rte collection-description page-width">
+          {{ collection.description }}
+        </div>
+      {% endif %}
+    
+    {% endif %}
+{% include 'nutrition-filter' %}
+    
+  </header>
+  <div class="">
+  <div class="c-food-list for-bg">
+    {% paginate collection.products by 6 %}
+  <div class="container collection-page" id="Collection">
+     <div id="MainContent">
+        <div class="EndlessScroll">
+      <div class="row">
+        {% for product in collection.products %}
+          {%- comment %}<locksmith:a990>{% endcomment -%}
+            {%- include 'locksmith-variables', locksmith_scope: 'subject', locksmith_subject: product, locksmith_subject_parent: collection %}{% if locksmith_transparent %}{% else %}{% continue %}{% endif -%}
+          {%- comment %}</locksmith:a990>{% endcomment -%}
+          <div class="col-sm-6 col-md-4">
+            {% include 'product-card-grid' %}
+          </div>
+        {% endfor %}
+        {% if paginate.next %}
+          <div class="pagination">
+            <a class="loading" href="{{ paginate.next.url }}">{% include 'icon-loading' %}</a>
+          </div>
+        {% endif %}
+      </div>
+       </div>
+    </div>
+  </div>
+    {% endpaginate %}
+  </div>
+  </div>
+</div>
+
+<script>    
+    $(document).ready(function(){
+    (function(d, script) {
+    script = d.createElement('script');
+    script.type = 'text/javascript';
+    script.async = true;
+    script.onload = function(){
+      console.log('d1111');
+      ajaxify();
+    };
+    script.src = '{{ 'ajaxfiy-2.js' | asset_url }}'; d.getElementsByTagName('head')[0].appendChild(script);
+  }(document));
+});
+</script>
+
+
+
+{% schema %}
+{
+  "name": "Collection pages",
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "grid",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "list",
+          "label": "List"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "grid",
+      "label":"Products per row (grid only)",
+      "default": 4,
+      "min": 2,
+      "max": 5,
+      "step": 1
+    },
+    {
+      "type": "range",
+      "id": "rows",
+      "label": "Rows per page (grid only)",
+      "default": 2,
+      "min": 2,
+      "max": 8,
+      "step": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_image",
+      "label": "Show collection image",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show product vendors",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "sort_enable",
+      "label": "Enable sorting",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "tags_enable",
+      "label": "Enable tag filtering",
+      "default": true
+    }
+  ]
+}
+{% endschema %}
